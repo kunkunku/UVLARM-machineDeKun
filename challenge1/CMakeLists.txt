@@ -27,4 +27,6 @@ install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
 
+install( PROGRAMS src/robot_move.py DESTINATION lib/${PROJECT_NAME})
+
 ament_package()
