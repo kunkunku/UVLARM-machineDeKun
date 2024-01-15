@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import rclpy
 import math
 import time
@@ -51,12 +53,12 @@ class Robot(Node):
         self.velocity_publisher.publish(velo)
 
     def choose_direction(self):
-        if self.obstacles_left and not self.obstacles_right:
-            return -0.5
-        elif self.obstacles_right and not self.obstacles_left:
-            return 0.5
+        if self.obstacles_left and self.obstacles_right is False:
+            return -0.8
+        elif self.obstacles_right and self.obstacles_left is False:
+            return 0.8
         elif self.obstacles_left and self.obstacles_right:
-            return -0.5
+            return -0.8
         
         else:
             return None
@@ -72,7 +74,7 @@ class Robot(Node):
     def emergency_maneuver(self):
         velo = Twist()
         velo.linear.x = 0.0
-        velo.angular.z = -0.3  
+        velo.angular.z = 0.3  
         self.velocity_publisher.publish(velo)
 
 def main():
