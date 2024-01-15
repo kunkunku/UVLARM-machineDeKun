@@ -110,9 +110,9 @@ class Robot(Node):
         close_threshold_y= 0.2
         if abs(aPoint[0]) < close_threshold_x and abs(aPoint[1]) < close_threshold_y:
             self.very_close_to_obstacle = True
-        if 0.2 < aPoint[0] < 0.3 and 0.2 < aPoint[1] < 0.3:
+        elif 0.2 < aPoint[0] < 0.3 and 0.2 < aPoint[1] < 0.3:
             self.obstacles_right = True
-        if -0.3 < aPoint[0] < -0.2 and 0.2 < aPoint[1] < 0.3:
+        elif -0.3 < aPoint[0] < -0.2 and 0.2 < aPoint[1] < 0.3:
             self.obstacles_left = True
         print(f"Obstacle Detected - Left: {self.obstacles_left}, Right: {self.obstacles_right}, Very Close: {self.very_close_to_obstacle}")
     def go_forward(self):
@@ -122,7 +122,7 @@ class Robot(Node):
             velo.angular.z = 0.0
             print("Very close to obstacle, stopping")
         elif not self.obstacles_left and not self.obstacles_right:
-            velo.linear.x = 0.2
+            velo.linear.x = 0.3
             print("Path clear, moving forward")
         else:
             velo.linear.x = 0.0
@@ -130,12 +130,13 @@ class Robot(Node):
         self.velocity_publisher.publish(velo)
 
     def choose_direction(self):
-        if self.obstacles_left and self.obstacles_right:
+        if self.obstacles_left and self.obstacles_right is False:
             return -0.8
-        elif self.obstacles_left:
-            return -0.8
-        elif self.obstacles_right:
+        elif self.obstacles_right and self.obstacles_left is False:
             return 0.8
+        elif self.obstacles_left and self.obstacles_right:
+            return -0.8
+        
         else:
             return None
 
