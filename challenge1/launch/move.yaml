@@ -1,8 +1,7 @@
 launch:
 
-
-# - node:
-#     pkg: "rviz2"
-#     exec: "rviz2"
-#     name: "rviz2"
+- node:
+    pkg: "challenge1"
+    exec: "robot_move.py"
+    name: "robot move"
 
