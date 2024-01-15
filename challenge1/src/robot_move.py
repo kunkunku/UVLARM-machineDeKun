@@ -35,9 +35,10 @@ class Robot(Node):
             self.very_close_to_obstacle = True
         elif 0.2 < aPoint[0] < 0.3 and 0.2 < aPoint[1] < 0.3:
             self.obstacles_right = True
-        elif -0.3 < aPoint[0] < -0.2 and 0.2 < aPoint[1] < 0.3:
+        elif 0.2 < aPoint[0] < 0.3 and -0.3 < aPoint[1] < 0.2:
             self.obstacles_left = True
         print(f"Obstacle Detected - Left: {self.obstacles_left}, Right: {self.obstacles_right}, Very Close: {self.very_close_to_obstacle}")
+    
     def go_forward(self):
         velo = Twist()
         if self.very_close_to_obstacle:
@@ -54,9 +55,9 @@ class Robot(Node):
 
     def choose_direction(self):
         if self.obstacles_left and self.obstacles_right is False:
-            return -0.8
-        elif self.obstacles_right and self.obstacles_left is False:
             return 0.8
+        elif self.obstacles_right and self.obstacles_left is False:
+            return -0.8
         elif self.obstacles_left and self.obstacles_right:
             return -0.8
         
@@ -74,7 +75,7 @@ class Robot(Node):
     def emergency_maneuver(self):
         velo = Twist()
         velo.linear.x = 0.0
-        velo.angular.z = 0.3  
+        velo.angular.z = 0.3
         self.velocity_publisher.publish(velo)
 
 def main():
