@@ -3,5 +3,5 @@ launch:
 - node:
     pkg: "challenge1"
     exec: "robot_move.py"
-    name: "robot move"
+    name: "robot_move"
 
