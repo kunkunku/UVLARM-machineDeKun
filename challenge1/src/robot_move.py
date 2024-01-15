@@ -2,10 +2,10 @@
 
 import rclpy
 import math
-import time
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Point32
 
 class Robot(Node):
     def __init__(self, name):
@@ -21,11 +21,16 @@ class Robot(Node):
         self.obstacles_left = False
         self.obstacles_right = False
         self.very_close_to_obstacle = False
+
         angle = scanMsg.angle_min
 
         for aDistance in scanMsg.ranges:
             if 0.1 < aDistance < 5.0:
-                aPoint = [math.cos(angle) * aDistance, math.sin(angle) * aDistance]
+                # aPoint = [math.cos(angle) * aDistance, math.sin(angle) * aDistance]
+                aPoint= Point32()
+                aPoint.x= (float)(math.cos(angle) * aDistance)
+                aPoint.y= (float)(math.sin( angle ) * aDistance)
+                aPoint.z= (float)(0)  
                 self.detect_obstacles(aPoint)
             angle += scanMsg.angle_increment
 
@@ -48,11 +53,11 @@ class Robot(Node):
         # self.very_close_to_obstacle = False
         close_threshold_x= 0.2  
         close_threshold_y= 0.2
-        if abs(aPoint[0]) < close_threshold_x and abs(aPoint[1]) < close_threshold_y:
+        if abs(aPoint.x) < close_threshold_x and abs(aPoint.y) < close_threshold_y:
             self.very_close_to_obstacle = True
-        elif 0.2 < aPoint[1] < 0.4 and 0.2 < aPoint[0] < 0.4:
+        elif 0.2 < aPoint.y < 0.5 and 0.2 < aPoint.x < 0.5:
             self.obstacles_left = True
-        elif -0.4 < aPoint[1] < 0.2 and 0.2 < aPoint[0] < 0.4:
+        elif -0.5 < aPoint.y  < 0.2 and 0.2 < aPoint.x < 0.5:
             self.obstacles_right = True
         # print(f"Obstacle Detected - Left: {self.obstacles_left}, Right: {self.obstacles_right}, Very Close: {self.very_close_to_obstacle}")
     
