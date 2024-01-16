@@ -2,6 +2,7 @@
 
 import rclpy
 import math
+import random
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
@@ -18,6 +19,7 @@ class Robot(Node):
         # self.very_close_to_obstacle = False
 
     def scan_callback(self, scanMsg):
+        obstacles = []
         self.obstacles_left = False
         self.obstacles_right = False
         self.very_close_to_obstacle = False
@@ -30,8 +32,9 @@ class Robot(Node):
                 aPoint= Point32()
                 aPoint.x= (float)(math.cos(angle) * aDistance)
                 aPoint.y= (float)(math.sin( angle ) * aDistance)
-                aPoint.z= (float)(0)  
-                self.detect_obstacles(aPoint)
+                aPoint.z= (float)(0)
+                obstacles.append(aPoint) 
+                self.detect_obstacles(obstacles)
             angle += scanMsg.angle_increment
 
         if self.very_close_to_obstacle or self.obstacles_left or self.obstacles_right:
@@ -47,18 +50,19 @@ class Robot(Node):
         else:
             self.turn_or_reverse()
 
-    def detect_obstacles(self, aPoint):
+    def detect_obstacles(self, obstacles):
         # self.obstacles_left = False
         # self.obstacles_right = False
         # self.very_close_to_obstacle = False
         close_threshold_x= 0.2  
         close_threshold_y= 0.2
-        if abs(aPoint.x) < close_threshold_x and abs(aPoint.y) < close_threshold_y:
-            self.very_close_to_obstacle = True
-        elif 0.2 < aPoint.y < 0.5 and 0.2 < aPoint.x < 0.5:
-            self.obstacles_left = True
-        elif -0.5 < aPoint.y  < 0.2 and 0.2 < aPoint.x < 0.5:
-            self.obstacles_right = True
+        for i in range (len(obstacles)):
+            if abs(obstacles[i].x) < close_threshold_x and abs(obstacles[i].y) < close_threshold_y:
+                self.very_close_to_obstacle = True
+            elif 0.2 < obstacles[i].y < 0.5 and 0.2 < obstacles[i].x < 0.5:
+                self.obstacles_left = True
+            elif -0.5 < obstacles[i].y  < 0.2 and 0.2 < obstacles[i].x < 0.5:
+                self.obstacles_right = True
         # print(f"Obstacle Detected - Left: {self.obstacles_left}, Right: {self.obstacles_right}, Very Close: {self.very_close_to_obstacle}")
     
     def go_forward(self):
@@ -96,7 +100,11 @@ class Robot(Node):
         elif self.obstacles_right and not self.obstacles_left :
             velo.angular.z = 1.0
         elif self.obstacles_left and self.obstacles_right:
-            velo.angular.z = -1.0
+            random_num = random.random()
+            if random_num < 0.5:
+                velo.angular.z = -1.0
+            else
+                velo.angular.z = 1.0
         
         # if turn_direction is not None:
         #     velo.angular.z = turn_direction
