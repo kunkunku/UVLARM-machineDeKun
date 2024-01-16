@@ -11,7 +11,7 @@ from geometry_msgs.msg import Point32
 class Robot(Node):
     def __init__(self, name):
         super().__init__(name)
-        self.velocity_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.velocity_publisher = self.create_publisher(Twist, '/multi/cmd_nav', 10)
         self.create_subscription(LaserScan, 'scan', self.scan_callback, 10)
         self.state = "forward"
         # self.obstacles_left = False
@@ -54,14 +54,14 @@ class Robot(Node):
         # self.obstacles_left = False
         # self.obstacles_right = False
         # self.very_close_to_obstacle = False
-        close_threshold_x= 0.2  
-        close_threshold_y= 0.2
+        close_threshold_x= 0.1  
+        close_threshold_y= 0.1
         for i in range (len(obstacles)):
             if abs(obstacles[i].x) < close_threshold_x and abs(obstacles[i].y) < close_threshold_y:
                 self.very_close_to_obstacle = True
-            elif 0.2 < obstacles[i].y < 0.5 and 0.2 < obstacles[i].x < 0.5:
+            elif 0.1 < obstacles[i].y < 0.3 and 0.1 < obstacles[i].x < 0.3:
                 self.obstacles_left = True
-            elif -0.5 < obstacles[i].y  < 0.2 and 0.2 < obstacles[i].x < 0.5:
+            elif -0.3 < obstacles[i].y  < 0.1 and 0.1 < obstacles[i].x < 0.3:
                 self.obstacles_right = True
         # print(f"Obstacle Detected - Left: {self.obstacles_left}, Right: {self.obstacles_right}, Very Close: {self.very_close_to_obstacle}")
     
@@ -94,17 +94,18 @@ class Robot(Node):
     def turn_or_reverse(self):
         # turn_direction = self.choose_direction()
         velo = Twist()
-        velo.linear.x = 0.0
+        velo.linear.x = 0.3
         if self.obstacles_left and not self.obstacles_right :
-            velo.angular.z = -1.0
+            velo.angular.z = -2.5
         elif self.obstacles_right and not self.obstacles_left :
-            velo.angular.z = 1.0
+            velo.angular.z = 2.5
         elif self.obstacles_left and self.obstacles_right:
+            velo.linear.x = 0.02
             random_num = random.random()
             if random_num < 0.5:
-                velo.angular.z = -1.0
-            else
-                velo.angular.z = 1.0
+                velo.angular.z = -4.0
+            else:
+                velo.angular.z = 4.0
         
         # if turn_direction is not None:
         #     velo.angular.z = turn_direction
