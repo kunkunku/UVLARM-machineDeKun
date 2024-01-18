@@ -57,6 +57,10 @@ class Realsense(Node):
         green_object = cv2.bitwise_and(color_image, color_image, mask=mask)
         
         num_green_pixels = np.count_nonzero(mask)
+
+        cv2.imshow('Green Mask', mask)
+        cv2.imshow('Green Object Detected', green_object)
+        cv2.waitKey(1)
         
         if num_green_pixels > 1000:  # Adjust the threshold as needed
             print("yes")
@@ -70,23 +74,27 @@ class Realsense(Node):
         frames = self.pipeline.wait_for_frames()
         color_frame = frames.get_color_frame()
         depth_frame = frames.get_depth_frame()
+        if not (depth_frame and color_frame)
+            continue
 
         color_image = np.asanyarray(color_frame.get_data())
-        msg_image = self.bridge.cv2_to_imgmsg(color_image, "bgr8")
-        msg_image.header.stamp = self.get_clock().now().to_msg()
-        msg_image.header.frame_id = "image"
-        self.image_publisher.publish(msg_image)
+        depth_color = np.asanyarray(depth_frame.get_data())
+        # msg_image = self.bridge.cv2_to_imgmsg(color_image, "bgr8")
+        # msg_image.header.stamp = self.get_clock().now().to_msg()
+        # msg_image.header.frame_id = "image"
+        # self.image_publisher.publish(msg_image)
 
         # Detect green object and publish detection result
-        is_green_object_detected = self.detect_green_object(color_image)
-        detection_msg = String()
-        detection_msg.data = "bottle founded" if is_green_object_detected else "bottle unfounded"
-        self.detection_publisher.publish(detection_msg)
+        # is_green_object_detected = self.detect_green_object(color_image)
+        # detection_msg = String()
+        # detection_msg.data = "bottle founded" if is_green_object_detected else "bottle unfounded"
+        # self.detection_publisher.publish(detection_msg)
 
         images = np.hstack((color_image, self.get_depth_colormap(depth_frame)))
 
         # Show images
         cv2.imshow('RealSense', images)
+
         cv2.waitKey(1)
 
     def get_depth_colormap(self, depth_frame):
@@ -95,9 +103,24 @@ class Realsense(Node):
         return depth_colormap
 
 
+    
+    def publish_imgs(color_image):
+        self.bridge=CvBridge()
+        msg_image = self.bridge.cv2_to_imgmsg(color_image,"bgr8")
+        msg_image.header.stamp = self.get_clock().now().to_msg()
+        msg_image.header.frame_id = "image"
+
+
+        # Detect green object and publish detection result
+        is_green_object_detected = self.detect_green_object(color_image)
+        detection_msg = String()
+        detection_msg.data = "bottle founded" if is_green_object_detected else "bottle unfounded"
+        self.detection_publisher.publish(detection_msg)
+    
     def run(self):
         while isOk:
             self.read_imgs()
+            self.publish_imgs()
             rclpy.spin_once(self, timeout_sec=0.001)
 
         # Stop streaming
