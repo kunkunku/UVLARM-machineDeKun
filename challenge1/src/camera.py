@@ -17,22 +17,41 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from std_msgs.msg import String
 from std_msgs.msg import Float32
-from visualization_msgs.msg import Marker
 
 class Realsense(Node):
     def __init__(self):
         super().__init__('realsense_node')
         self.bridge = CvBridge()
         self.image_publisher = self.create_publisher(Image, 'image', 10)
-        self.detection_publisher = self.create_publisher(String, 'detection', 10)
+
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.colorizer = rs.colorizer()
+
+        self.detection_publisher = self.create_publisher(String,'detection',10)
+        self.distancebottle_publisher = self.create_publisher(Float32,'distancebottle',10)
+        self.bottle_x_position_publisher = self.create_publisher(Float32,'bottle_x_postion',10)
+        self.bottle_z_position_publisher = self.create_publisher(Float32,'bottle_z_postion',10)
+       
+        pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
+        pipeline_profile = self.config.resolve(pipeline_wrapper)
+        device = pipeline_profile.get_device()
+        device_product_line = str(device.get_info(rs.camera_info.product_line))
+        found_rgb = True
+        for s in device.sensors:
+            print( "Name:" + s.get_info(rs.camera_info.name) )
+            if s.get_info(rs.camera_info.name) == 'RGB Camera':
+                found_rgb = True
+        if not (found_rgb):
+            print("Depth camera required !!!")
+            exit(0)
         self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
         self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
         self.pipeline.start(self.config)
         self.isOk = True
         self.color_info = (0, 0, 255)
+        self.dx = 0.0
+        self.dz = 0.0
 
         self.align_to = rs.stream.color
         self.align = rs.align(self.align_to)
@@ -140,8 +159,8 @@ class Realsense(Node):
 
                 x, y = int(x), int(y)
                 self.depth = depth_frame.get_distance(x, y)
-                dx ,dy, dz = rs.rs2_deproject_pixel_to_point(color_intrin, [x,y], self.depth)
-                self.distance = math.sqrt(((dx)**2) + ((dy)**2) + ((dz)**2))
+                self.dx ,dy, self.dz = rs.rs2_deproject_pixel_to_point(color_intrin, [x,y], self.depth)
+                self.distance = math.sqrt(((self.dx)**2) + ((dy)**2) + ((self.dz)**2))
                 print(x)
                 print(y)
                 print(self.distance)
@@ -171,11 +190,6 @@ class Realsense(Node):
             refTime= newTime
             count= 0
         count+= 1
-
-    # def get_depth_colormap(self, depth_frame):
-    #     # Convert the depth frame to a colormap
-    #     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(np.asanyarray(depth_frame.get_data()), alpha=0.03), cv2.COLORMAP_JET)
-    #     return depth_colormap
     
     def publish_images(self):
         msg_image = self.bridge.cv2_to_imgmsg(self.color_image, "bgr8")
@@ -189,6 +203,15 @@ class Realsense(Node):
         detection_msg = String()
         detection_msg.data = "bottle founded" if self.bottle_finded else "bottle unfounded"
         self.detection_publisher.publish(detection_msg)
+
+        position_x_msg= Float32()
+        position_x_msg.data = self.dx
+        self.bottle_x_position_publisher.publish(position_x_msg)
+
+        position_y_msg= Float32()
+        position_y_msg.data = self.dz
+        self.bottle_z_position_publisher.publish(position_y_msg)
+
     
     def run(self):
         while self.isOk:

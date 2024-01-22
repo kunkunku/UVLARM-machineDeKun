@@ -28,7 +28,7 @@ install(DIRECTORY launch
 )
 
 install( PROGRAMS src/robot_move.py DESTINATION lib/${PROJECT_NAME})
-
+install( PROGRAMS src/camera.py DESTINATION lib/${PROJECT_NAME})
 
 
 ament_package()
