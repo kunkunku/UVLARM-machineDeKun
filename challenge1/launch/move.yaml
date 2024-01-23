@@ -8,10 +8,9 @@ launch:
 #     exec: "async_slam_"
     
 - executable: 
-    # cmd: gnome-terminal --tab -e "ros2 launch slam_toolbox online_sync_launch.py use_sim_time:=False"
     # cmd: gnome-terminal --tab -e "ros2 launch tbot_sim challenge-1.launch.py"
-    # cmd: gnome-terminal --tab -e "ros2 launch slam_toolbox online_sync_launch.py use_sim_time:=False"
-    # cmd: gnome-terminal --tab -e "rviz2"
+    cmd: gnome-terminal --tab -e "ros2 launch slam_toolbox online_sync_launch.py use_sim_time:=False"
+    cmd: gnome-terminal --tab -e "rviz2"
     cmd: gnome-terminal --tab -e "python3 /home/bot/mb6-space/UVLARM-machineDeKun/challenge1/src/camera.py"
 
 - executable: 
